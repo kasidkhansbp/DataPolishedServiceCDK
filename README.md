@@ -1,7 +1,7 @@
 
-# Welcome to your CDK Python project!
+# Welcome to DataPolishedService CDK package!
 
-This is a blank project for CDK development with Python.
+This is a blank project for DataPolishedService CDK package.
 
 The `cdk.json` file tells the CDK Toolkit how to execute your app.
 

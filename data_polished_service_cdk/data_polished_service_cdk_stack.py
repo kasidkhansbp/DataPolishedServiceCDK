@@ -39,3 +39,6 @@ class DataPolishedServiceCdkStack(Stack):
         dynamo_table = dynamodb.Table(self, "PolishedDataDBTable",
                                       partition_key=dynamodb.Attribute(name="Id",
                                     type=dynamodb.AttributeType.STRING), read_capacity=5,write_capacity=5)
+
+        # Grant the Lambda function permissions to write to DynamoDB
+        dynamo_table.grant_write_data(lambda_function)

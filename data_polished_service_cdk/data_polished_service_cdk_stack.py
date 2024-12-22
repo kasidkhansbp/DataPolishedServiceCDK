@@ -4,7 +4,8 @@ from aws_cdk import (
     aws_s3 as s3,
     aws_sqs as sqs,
     aws_s3_notifications as s3_notification,
-    aws_lambda as _lambda
+    aws_lambda as _lambda,
+    aws_dynamodb as dynamodb
 )
 
 from constructs import Construct
@@ -33,3 +34,8 @@ class DataPolishedServiceCdkStack(Stack):
         handler = "index.handler"
         # read the docker image here
         code=_lambda.Code.from_asset("lambda/")
+
+        #Create a dynamoDB table
+        dynamo_table = dynamodb.Table(self, "PolishedDataDBTable",
+                                      partition_key=dynamodb.Attribute(name="Id",
+                                    type=dynamodb.AttributeType.STRING), read_capacity=5,write_capacity=5)

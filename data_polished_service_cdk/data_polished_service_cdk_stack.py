@@ -1,8 +1,12 @@
 from aws_cdk import (
     # Duration,
     Stack,
-    # aws_sqs as sqs,
+    aws_s3 as s3,
+    aws_sqs as sqs,
+    aws_s3_notifications as s3_notification,
+    aws_lambda as _lambda
 )
+
 from constructs import Construct
 
 class DataPolishedServiceCdkStack(Stack):
@@ -17,3 +21,15 @@ class DataPolishedServiceCdkStack(Stack):
         #     self, "DataPolishedServiceCdkQueue",
         #     visibility_timeout=Duration.seconds(300),
         # )
+
+        my_bucket = s3.Bucket(self,"MyBucket")
+
+        my_queue = sqs.Queue(self, "MyQueue")
+
+        #Enable notifications for the bucket
+        my_bucket.add_event_notification(s3.EventType.OBJECT_CREATED,s3_notification.SqsDestination(my_queue))
+
+        lambda_function = _lambda.Function(self, "myFunction", runtime=_lambda.Runtime.PYTHON_3_8)
+        handler = "index.handler"
+        # read the docker image here
+        code=_lambda.Code.from_asset("lambda/")

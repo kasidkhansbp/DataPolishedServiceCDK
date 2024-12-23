@@ -7,5 +7,5 @@ from data_polished_service_cdk.data_polished_service_cdk_stack import DataPolish
 class AppStages(Stage):
     def __init__(self, scope: Construct, id: str, **kwargs) -> None:
         super().__init__(scope, id, **kwargs)
-
+        # All the stacks gets added to app here
         DataPolishedServiceCdkStack(self,"DataPolishedServiceCdkStack")

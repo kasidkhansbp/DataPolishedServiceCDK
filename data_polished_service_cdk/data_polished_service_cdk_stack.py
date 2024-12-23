@@ -47,5 +47,9 @@ class DataPolishedServiceCdkStack(Stack):
         # Connect SQS to Lambda ( SQS to Lambda )
         lambda_function.add_event_source(lambda_event_sources.SqsEventSource(my_queue))
 
+        # Give lambda permissions to consume SQS
+        my_queue.grant_consume_messages(lambda_function)
+
         cloudwatch.Alarm(self, "DLQAlarm", metric=dlq.metric_approximate_number_of_messages_visible(), threshold=10,
                          evaluation_periods=1, alarm_name="DLQMessageOverFlow")
+

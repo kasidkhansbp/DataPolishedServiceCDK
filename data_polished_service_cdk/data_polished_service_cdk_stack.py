@@ -23,7 +23,7 @@ class DataPolishedServiceCdkStack(Stack):
 
         dlq = sqs.Queue(self, "MyDLQ")
 
-        my_queue = sqs.Queue(self, "MyQueue", dead_letter_queue=sqs.DeadLetterQueue(max_receive_count=5))
+        my_queue = sqs.Queue(self, "MyQueue", dead_letter_queue=sqs.DeadLetterQueue(max_receive_count=5, queue=dlq))
 
         # Enable notifications for the bucket
         my_bucket.add_event_notification(s3.EventType.OBJECT_CREATED, s3_notification.SqsDestination(my_queue))

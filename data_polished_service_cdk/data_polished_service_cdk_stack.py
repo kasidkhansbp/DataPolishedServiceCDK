@@ -5,9 +5,9 @@ from aws_cdk import (
     aws_sqs as sqs,
     aws_s3_notifications as s3_notification,
     aws_lambda as _lambda,
-    aws_dynamodb as dynamodb
+    aws_dynamodb as dynamodb,
+    aws_lambda_event_sources as lambda_event_sources
 )
-
 from constructs import Construct
 
 class DataPolishedServiceCdkStack(Stack):
@@ -17,23 +17,19 @@ class DataPolishedServiceCdkStack(Stack):
 
         # The code that defines your stack goes here
 
-        # example resource
-        # queue = sqs.Queue(
-        #     self, "DataPolishedServiceCdkQueue",
-        #     visibility_timeout=Duration.seconds(300),
-        # )
-
         my_bucket = s3.Bucket(self,"MyBucket")
 
-        my_queue = sqs.Queue(self, "MyQueue")
+        dlq = sqs.Queue(self, "MyDLQ")
+
+        my_queue = sqs.Queue(self, "MyQueue", dead_letter_queue=sqs.DeadLetterQueue(max_receive_count=5))
 
         #Enable notifications for the bucket
         my_bucket.add_event_notification(s3.EventType.OBJECT_CREATED,s3_notification.SqsDestination(my_queue))
 
-        lambda_function = _lambda.Function(self, "myFunction", runtime=_lambda.Runtime.PYTHON_3_8)
-        handler = "index.handler"
-        # read the docker image here
-        code=_lambda.Code.from_asset("lambda/")
+        lambda_function = _lambda.Function(self, "myFunction",
+            runtime =_lambda.Runtime.PYTHON_3_8,
+            handler = "index.handler",
+            code=_lambda.Code.from_asset("lambda/"))
 
         #Create a dynamoDB table
         dynamo_table = dynamodb.Table(self, "PolishedDataDBTable",
@@ -42,3 +38,8 @@ class DataPolishedServiceCdkStack(Stack):
 
         # Grant the Lambda function permissions to write to DynamoDB
         dynamo_table.grant_write_data(lambda_function)
+        # Grant the lambda function to read data from S3 file
+        my_bucket.grant_read(lambda_function)
+
+        #Connect SQS to Lambda ( SQS to Lambda )
+        lambda_function.add_event_source(lambda_event_sources.SqsEventSource(my_queue))
